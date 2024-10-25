@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <style type="text/css">
+        body {
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #connection-message {
+            height: 30px;
+            color: #fff;
+            padding: 25px;
+
+            text-align: center;
+            z-index: 9999;
+            width: 100%;
+        }
+
+        .main_div {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+    </style>
+
+
+    <div class="main_div">
+        <div id="connection-message"></div>
+
+
+    </div>
+
+    <script type="text/javascript">
+        var startTime = new Date().getTime();
+        var img = new Image();
+        img.onload = function () {
+            var loadtime = new Date().getTime() - startTime;
+            checkConnectionSpeed(loadtime);
+        };
+        img.src = "https://images.pexels.com/photos/531880/pexels-photo-531880.jpeg?" + startTime;
+
+        function checkConnectionSpeed(millisecond) {
+            var x = document.getElementById("connection-message");
+            if (millisecond > 5000) {
+                x.style.backgroundColor = 'red';
+                x.innerHTML = 'Your Internet Connection is too slow';
+            } else if (millisecond > 3000) {
+                x.style.backgroundColor = 'orange';
+                x.innerHTML = 'Your Internet Connection is a bit slow';
+            } else {
+                x.style.backgroundColor = 'green';
+                x.innerHTML = 'Your Internet Connection looks good';
+            }
+        }
+    </script>
+</body>
+
+</html>
