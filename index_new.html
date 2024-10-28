@@ -20,8 +20,9 @@
         const video = document.getElementById('video');
         const speedDisplay = document.getElementById('speed');
         
-        let frameCount = 0;
         let startTime;
+        let byteCount = 0; // Initialize byte counter
+        const measurementDuration = 1000; // Measure speed every second
 
         async function startCamera() {
             try {
@@ -40,26 +41,26 @@
 
         function measureSpeed() {
             const interval = setInterval(() => {
-                frameCount++;
                 const currentTime = new Date().getTime();
                 const duration = (currentTime - startTime) / 1000; // duration in seconds
 
-                // Estimate the data size: each frame size can vary, this is a rough estimate
-                const estimatedFrameSize = 50000; // Adjust as needed (in bytes, this is just an example)
-                const totalDataSize = frameCount * estimatedFrameSize; // Total data in bytes
+                // Estimate the data size: adjust as needed (in bytes)
+                const estimatedFrameSize = 50000; // Adjust according to camera settings
+                byteCount += estimatedFrameSize; // Simulate bytes processed for the last second
 
-                const speedMbps = (totalDataSize / (duration * 1024 * 1024)).toFixed(2); // Convert bytes to Mbps
+                // Calculate speed in Kbps
+                const speedKbps = (byteCount * 8) / duration / 1024; // Convert bytes to kilobits
 
-                speedDisplay.textContent = `Streaming Speed: ${speedMbps} Mbps`;
+                speedDisplay.textContent = `Streaming Speed: ${speedKbps.toFixed(2)} Kbps`;
 
                 // Reset after 10 seconds
                 if (duration >= 10) {
                     clearInterval(interval);
-                    frameCount = 0;
-                    startTime = new Date().getTime();
+                    byteCount = 0; // Reset byte count
+                    startTime = new Date().getTime(); // Reset start time
                     measureSpeed(); // Start measuring again
                 }
-            }, 1000); // Measure every second
+            }, measurementDuration); // Measure every second
         }
 
         startCamera();
