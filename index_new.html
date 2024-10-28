@@ -3,40 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Stream Speed Test</title>
+    <title>Camera Stream Speed Test</title>
     <style>
         video {
             width: 600px;
             height: auto;
+            border: 1px solid black;
         }
     </style>
 </head>
 <body>
-    <video id="video" controls>
-        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
+    <video id="video" autoplay playsinline></video>
     <p id="speed">Loading speed...</p>
 
     <script>
         const video = document.getElementById('video');
         const speedDisplay = document.getElementById('speed');
         
-        let startTime, endTime;
+        let frameCount = 0;
+        let startTime;
 
-        video.addEventListener('loadstart', () => {
-            startTime = new Date().getTime();
-        });
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
 
-        video.addEventListener('loadeddata', () => {
-            endTime = new Date().getTime();
-            const duration = (endTime - startTime) / 1000; // duration in seconds
+                // Start measuring speed after the video is playing
+                video.addEventListener('playing', () => {
+                    startTime = new Date().getTime();
+                    measureSpeed();
+                });
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+            }
+        }
 
-            const videoSize = video.videoWidth * video.videoHeight * 3; // Approximation in bytes
-            const speedMbps = (videoSize / (duration * 1024 * 1024)).toFixed(2); // Convert bytes to Mbps
-            
-            speedDisplay.textContent = `Streaming Speed: ${speedMbps} Mbps`;
-        });
+        function measureSpeed() {
+            const interval = setInterval(() => {
+                frameCount++;
+                const currentTime = new Date().getTime();
+                const duration = (currentTime - startTime) / 1000; // duration in seconds
+
+                // Estimate the data size: each frame size can vary, this is a rough estimate
+                const estimatedFrameSize = 50000; // Adjust as needed (in bytes, this is just an example)
+                const totalDataSize = frameCount * estimatedFrameSize; // Total data in bytes
+
+                const speedMbps = (totalDataSize / (duration * 1024 * 1024)).toFixed(2); // Convert bytes to Mbps
+
+                speedDisplay.textContent = `Streaming Speed: ${speedMbps} Mbps`;
+
+                // Reset after 10 seconds
+                if (duration >= 10) {
+                    clearInterval(interval);
+                    frameCount = 0;
+                    startTime = new Date().getTime();
+                    measureSpeed(); // Start measuring again
+                }
+            }, 1000); // Measure every second
+        }
+
+        startCamera();
     </script>
 </body>
 </html>
