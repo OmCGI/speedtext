@@ -6,57 +6,22 @@
     <title>WiFi and Internet Speed Check</title>
 </head>
 <body>
-    <h1>WiFi and Internet Speed Check</h1>
-    <button onclick="checkConnection()">Check Connection</button>
-    <p id="wifiStatus"></p>
-    <p id="internetSpeed"></p>
+     
 
     <script>
-        // Function to check network information
-        function checkConnection() {
-            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-            const wifiStatusElem = document.getElementById('wifiStatus');
-            const internetSpeedElem = document.getElementById('internetSpeed');
-            
-            if (connection) {
-                const type = connection.type || "unknown";
-                const effectiveType = connection.effectiveType || "unknown";
-                wifiStatusElem.textContent = `Connection Type: ${type}, Effective Type: ${effectiveType}`;
+         const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
 
-                // Check if connected over WiFi
-                if (type === 'wifi') {
-                    wifiStatusElem.textContent += ' (Connected to WiFi)';
-                } else {
-                    wifiStatusElem.textContent += ' (Not connected to WiFi)';
-                }
-            } else {
-                wifiStatusElem.textContent = 'Network information not supported on this browser.';
-            }
+if (connection) {
+  console.log('Effective connection type:', connection.effectiveType);
+  console.log('Downlink speed:', connection.downlink, 'Mbps');
+  console.log('Round-trip time:', connection.rtt, 'ms');
+  console.log('Save Data enabled:', connection.saveData);
 
-            // Run a simple speed test
-            measureInternetSpeed().then(speed => {
-                internetSpeedElem.textContent = `Estimated Internet Speed: ${speed} Mbps`;
-            }).catch(() => {
-                internetSpeedElem.textContent = 'Unable to determine internet speed.';
-            });
-        }
+  connection.addEventListener('change', () => {
+    console.log('Connection type changed:', connection.effectiveType);
+  });
+}
 
-        // Function to measure download speed
-        async function measureInternetSpeed() {
-            const testFileUrl = 'https://via.placeholder.com/10'; // Small resource to avoid heavy load
-            const fileSizeInBytes = 500; // Approximate size of the test file in bytes
-
-            const startTime = performance.now();
-            await fetch(testFileUrl, { cache: 'no-store' });
-            const endTime = performance.now();
-
-            // Calculate the speed in Mbps
-            const durationInSeconds = (endTime - startTime) / 1000;
-            const fileSizeInBits = fileSizeInBytes * 8;
-            const speedMbps = (fileSizeInBits / durationInSeconds) / (1024 * 1024);
-
-            return speedMbps.toFixed(2);
-        }
     </script>
 </body>
 </html>
