@@ -3,67 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Camera Stream Speed Test</title>
-    <style>
-        video {
-            width: 600px;
-            height: auto;
-            border: 1px solid black;
-        }
-    </style>
+    <title>Network Speed Test</title>
 </head>
 <body>
-    <video id="video" autoplay playsinline></video>
-    <p id="speed">Loading speed...</p>
+    <h1>Network Speed Test</h1>
+    <button id="testSpeed">Check Network Speed</button>
+    <p id="speed">Speed: </p>
 
     <script>
-        const video = document.getElementById('video');
-        const speedDisplay = document.getElementById('speed');
-        
-        let startTime;
-        let byteCount = 0; // Initialize byte counter
-        const measurementDuration = 1000; // Measure speed every second
+        async function checkNetworkSpeed() {
+            const speedDisplay = document.getElementById('speed');
+            const testFileUrl = 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png'; // Example file URL
+            const startTime = new Date().getTime();
 
-        async function startCamera() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                video.srcObject = stream;
+                // Fetch the test file
+                const response = await fetch(testFileUrl, { method: 'GET', mode: 'cors' });
+                const blob = await response.blob();
+                const endTime = new Date().getTime();
+                
+                // Calculate speed
+                const duration = (endTime - startTime) / 1000; // Duration in seconds
+                const fileSize = blob.size; // Size in bytes
+                const speedKbps = (fileSize * 8) / duration / 1024; // Convert to Kbps
 
-                // Start measuring speed after the video is playing
-                video.addEventListener('playing', () => {
-                    startTime = new Date().getTime();
-                    measureSpeed();
-                });
+                speedDisplay.textContent = `Speed: ${speedKbps.toFixed(2)} Kbps`;
             } catch (error) {
-                console.error('Error accessing camera:', error);
+                console.error('Error fetching the file:', error);
+                speedDisplay.textContent = 'Error measuring speed.';
             }
         }
 
-        function measureSpeed() {
-            const interval = setInterval(() => {
-                const currentTime = new Date().getTime();
-                const duration = (currentTime - startTime) / 1000; // duration in seconds
-
-                // Estimate the data size: adjust as needed (in bytes)
-                const estimatedFrameSize = 50000; // Adjust according to camera settings
-                byteCount += estimatedFrameSize; // Simulate bytes processed for the last second
-
-                // Calculate speed in Kbps
-                const speedKbps = (byteCount * 8) / duration / 1024; // Convert bytes to kilobits
-
-                speedDisplay.textContent = `Streaming Speed: ${speedKbps.toFixed(2)} Kbps`;
-
-                // Reset after 10 seconds
-                if (duration >= 10) {
-                    clearInterval(interval);
-                    byteCount = 0; // Reset byte count
-                    startTime = new Date().getTime(); // Reset start time
-                    measureSpeed(); // Start measuring again
-                }
-            }, measurementDuration); // Measure every second
-        }
-
-        startCamera();
+        document.getElementById('testSpeed').addEventListener('click', checkNetworkSpeed);
     </script>
 </body>
 </html>
