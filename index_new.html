@@ -3,25 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WiFi and Internet Speed Check</title>
+    <title>Video Stream Speed Test</title>
+    <style>
+        video {
+            width: 600px;
+            height: auto;
+        }
+    </style>
 </head>
 <body>
-     
+    <video id="video" controls>
+        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <p id="speed">Loading speed...</p>
 
     <script>
-         const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        const video = document.getElementById('video');
+        const speedDisplay = document.getElementById('speed');
+        
+        let startTime, endTime;
 
-if (connection) {
-  console.log('Effective connection type:', connection.effectiveType);
-  console.log('Downlink speed:', connection.downlink, 'Mbps');
-  console.log('Round-trip time:', connection.rtt, 'ms');
-  console.log('Save Data enabled:', connection.saveData);
+        video.addEventListener('loadstart', () => {
+            startTime = new Date().getTime();
+        });
 
-  connection.addEventListener('change', () => {
-    console.log('Connection type changed:', connection.effectiveType);
-  });
-}
+        video.addEventListener('loadeddata', () => {
+            endTime = new Date().getTime();
+            const duration = (endTime - startTime) / 1000; // duration in seconds
 
+            const videoSize = video.videoWidth * video.videoHeight * 3; // Approximation in bytes
+            const speedMbps = (videoSize / (duration * 1024 * 1024)).toFixed(2); // Convert bytes to Mbps
+            
+            speedDisplay.textContent = `Streaming Speed: ${speedMbps} Mbps`;
+        });
     </script>
 </body>
 </html>
