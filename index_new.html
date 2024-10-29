@@ -1,16 +1,14 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Network Information</title>
-    <meta http-equiv="refresh" content="2">
-
+    <title>Network Speed Checker</title>
 </head>
 <body>
     <h1>Network Information</h1>
     <div id="network-info">
-        <p>Download Speed: <span id="downloadSpeed"></span> MB/sec</p>
+        <p>Download Speed: <span id="downloadSpeed">Calculating...</span> MB/sec</p>
         <p>Round Trip Time (RTT): <span id="rtt"></span> ms</p>
         <p>Effective Connection Type: <span id="effectiveType"></span></p>
         <p>Data Saver Mode: <span id="saveData"></span></p>
@@ -18,15 +16,33 @@
     <div id="quality-message"></div>
 
     <script>
+        async function measureDownloadSpeed() {
+            const imageUrl = "https://via.placeholder.com/1"; // A small 1x1 pixel image
+            const startTime = performance.now();
+            try {
+                await fetch(imageUrl + "?cache=" + Math.random()); // Cache-busting with a random query param
+                const endTime = performance.now();
+                const duration = (endTime - startTime) / 1000; // in seconds
+                const fileSizeInBits = 8 * 1024; // Approx. 1 KB in bits
+                const speedMbps = (fileSizeInBits / duration / (1024 * 1024)).toFixed(2); // Mbps
+
+                document.getElementById("downloadSpeed").innerText = speedMbps + " MB/sec";
+            } catch (error) {
+                console.error("Failed to measure speed:", error);
+                document.getElementById("downloadSpeed").innerText = "Error measuring speed";
+            }
+        }
+
         function updateNetworkInfo() {
             const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-            document.getElementById("downloadSpeed").innerText = connection.downlink;
-            document.getElementById("rtt").innerText = connection.rtt;
-            document.getElementById("effectiveType").innerText = connection.effectiveType;
-            document.getElementById("saveData").innerText = connection.saveData ? "Enabled" : "Disabled";
+            if (connection) {
+                document.getElementById("rtt").innerText = connection.rtt;
+                document.getElementById("effectiveType").innerText = connection.effectiveType;
+                document.getElementById("saveData").innerText = connection.saveData ? "Enabled" : "Disabled";
+            }
 
             const slowConnection = ['slow-2g', '2g'];
-            const isSlowConnection = slowConnection.includes(connection.effectiveType);
+            const isSlowConnection = connection && slowConnection.includes(connection.effectiveType);
 
             document.getElementById("quality-message").innerText = 
                 isSlowConnection ? "Reduce video quality" : "Maintain or increase video quality";
@@ -34,12 +50,13 @@
 
         // Initial load
         updateNetworkInfo();
+        measureDownloadSpeed();
 
-        // Listen for changes
-        navigator.connection.addEventListener("change", () => {
+        // Update info every 10 seconds
+        setInterval(() => {
+            measureDownloadSpeed();
             updateNetworkInfo();
-            console.log("Network status change:", navigator.connection);
-        });
+        }, 10000); // Every 10 seconds
     </script>
 </body>
 </html>
