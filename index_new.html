@@ -3,13 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-Time Network Speed</title>
+    <title>Real-Time Network Speed Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #network-info {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
     <h1>Network Information</h1>
     <div id="network-info">
-        <p>Estimated Download Speed: <span id="downloadSpeed">Calculating...</span> kb/s</p>
-        <p>Round Trip Time (RTT): <span id="rtt"></span> ms</p>
+        <p>Estimated   Speed: <span id="downloadSpeed">Calculating...</span></p>
+        <p>Round Trip Time (RTT): <span id="rtt"></span>  </p>
         <p>Effective Connection Type: <span id="effectiveType"></span></p>
         <p>Data Saver Mode: <span id="saveData"></span></p>
     </div>
@@ -26,7 +35,7 @@
                 for (let i = 0; i < testIterations; i++) {
                     const startTime = performance.now();
                     const response = await fetch(testUrl, { method: 'GET', cache: 'no-store' });
-                    const data = await response.json(); // Parse the response
+                    const data = await response.json(); // Parse the response to count its size accurately
                     const endTime = performance.now();
 
                     // Calculate the size of the downloaded data in bits
@@ -47,7 +56,7 @@
         function updateNetworkInfo() {
             const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
             if (connection) {
-                document.getElementById("rtt").innerText = connection.rtt || "N/A";
+                document.getElementById("rtt").innerText = connection.rtt ? connection.rtt + " ms" : "N/A";
                 document.getElementById("effectiveType").innerText = connection.effectiveType || "Unknown";
                 document.getElementById("saveData").innerText = connection.saveData ? "Enabled" : "Disabled";
             }
@@ -67,7 +76,7 @@
         setInterval(() => {
             measureNetworkSpeed();
             updateNetworkInfo();
-        }, 10000); // Every 10 seconds
+        }, 5000); // Every 10 seconds
     </script>
 </body>
 </html>
