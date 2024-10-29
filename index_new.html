@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Network Speed Checker</title>
+    <title>Estimated Network Speed</title>
 </head>
 <body>
     <h1>Network Information</h1>
@@ -16,20 +16,30 @@
     <div id="quality-message"></div>
 
     <script>
-        async function measureNetworkLatency() {
-            const startTime = performance.now();
+        async function measureNetworkSpeed() {
+            const testUrl = "https://jsonplaceholder.typicode.com/posts/1"; // Small JSON payload
+            const testIterations = 5;
+            let totalSize = 0;
+            let totalTime = 0;
+
             try {
-                // Fetch a small amount of data from an internal API endpoint or external reliable source
-                await fetch("https://jsonplaceholder.typicode.com/posts/1", { method: 'HEAD', cache: 'no-store' });
-                const endTime = performance.now();
-                const latency = (endTime - startTime) / 1000; // in seconds
+                for (let i = 0; i < testIterations; i++) {
+                    const startTime = performance.now();
+                    const response = await fetch(testUrl, { method: 'GET', cache: 'no-store' });
+                    const data = await response.json(); // Parse the response to count its size accurately
+                    const endTime = performance.now();
 
-                // Approximate speed calculation (based on latency only)
-                const estimatedSpeedMbps = (1 / latency).toFixed(2); // In Mbps based on latency alone
+                    // Calculate the size of the downloaded data in bits
+                    const responseSize = JSON.stringify(data).length * 8; // Convert JSON size in bytes to bits
+                    totalSize += responseSize;
+                    totalTime += (endTime - startTime) / 1000; // Convert time to seconds
+                }
 
-                document.getElementById("downloadSpeed").innerText = estimatedSpeedMbps + " MB/sec";
+                // Estimated speed in Mbps
+                const speedMbps = (totalSize / totalTime / (1024 * 1024)).toFixed(2); // Convert bits/sec to Mbps
+                document.getElementById("downloadSpeed").innerText = speedMbps + " MB/sec";
             } catch (error) {
-                console.error("Error measuring latency:", error);
+                console.error("Error measuring speed:", error);
                 document.getElementById("downloadSpeed").innerText = "Error measuring speed";
             }
         }
@@ -51,11 +61,11 @@
 
         // Initial load
         updateNetworkInfo();
-        measureNetworkLatency();
+        measureNetworkSpeed();
 
-        // Update info every 10 seconds
+        // Update every 10 seconds
         setInterval(() => {
-            measureNetworkLatency();
+            measureNetworkSpeed();
             updateNetworkInfo();
         }, 10000); // Every 10 seconds
     </script>
